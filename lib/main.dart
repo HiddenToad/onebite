@@ -4,29 +4,38 @@ void main() {
   runApp(const OnebiteApp());
 }
 
+// Types of step regions: either a fixed order or an unordered set of steps
 enum StepRegionType { Fixed, Unordered }
 
+// Abstract base class for any region of steps
 sealed class StepRegion {
+  // Returns the next step string, or null if there are no steps left
   String? next();
+
+  // Returns the type of this step region (Fixed or Unordered)
   StepRegionType type();
 }
 
+// A region where steps are performed in a fixed, linear order
 class FixedStepRegion extends StepRegion {
-  int _idx = 0;
-  var steps = <String>[];
+  int _idx = 0; // Tracks the current position in the list
+  var steps = <String>[]; // Ordered list of steps
 
+  // Constructor
   FixedStepRegion({required this.steps});
 
+  // Adds a new step at the end of the list
   void addStep(step) {
     steps.add(step);
   }
 
   @override
   String? next() {
+    // Return the current step and move to the next
     if (_idx < steps.length) {
       return steps[_idx++];
     } else {
-      return null;
+      return null; // No more steps
     }
   }
 
@@ -36,16 +45,19 @@ class FixedStepRegion extends StepRegion {
   }
 }
 
-enum UnorderedSRPullMode { pullRandN, pullAll }
+// Set-building modes for unordered step regions
+enum PullMode { pullRandN, pullAll }
 
-enum UnorderedSRStopMode { untilGoalConf, untilSetSeen, untilSetSeenNTimes }
+// Stop conditions for unordered step regions
+enum StopMode { untilGoalConf, untilSetSeen, untilSetSeenNTimes }
 
+// A region where steps are performed in an unordered/randomized fashion
 class UnorderedStepRegion extends StepRegion {
-  var _steps = <String>[];
-  late UnorderedSRPullMode _pullMode;
-  late UnorderedSRStopMode _stopMode;
-  int? _pullN;
-  int? _stopN;
+  var _steps = <String>[]; // List of available steps
+  late PullMode _pullMode; // How steps are pulled (all or some)
+  late StopMode _stopMode; // When to stop pulling steps from this region
+  int? _pullN; // (optional) Number of steps to pull if pullRandN is active
+  int? _stopN; // (optional) How many times to see steps if untilSetSeenNTimes is active
 
   UnorderedStepRegion(pullMode, stopMode, int? pullN, int? setN) {
     _pullMode = pullMode;
@@ -53,17 +65,20 @@ class UnorderedStepRegion extends StepRegion {
     _pullN = pullN;
     _stopN = setN;
 
-    if (_pullMode == UnorderedSRPullMode.pullRandN) {
+    // Validation: pullN must be set if pullRandN mode is used
+    if (_pullMode == PullMode.pullRandN) {
       assert(_pullN != null);
     }
-    if (_stopMode == UnorderedSRStopMode.untilSetSeenNTimes) {
+    // Validation: stopN must be set if untilSetSeenNTimes mode is used
+    if (_stopMode == StopMode.untilSetSeenNTimes) {
       assert(_stopN != null);
     }
   }
 
   @override
   String? next() {
-    return null; //TODO unimplemented
+    // TODO: Implement logic for randomly selecting steps based on pull mode and stop conditions
+    return null;
   }
 
   @override
@@ -72,31 +87,36 @@ class UnorderedStepRegion extends StepRegion {
   }
 }
 
+// A full checklist made of multiple step regions
 class Tasklist {
-  String? _currentStep;
-  int _idx = 0;
-  var stepRegions = <StepRegion>[];
+  String? _currentStep; // Currently active step
+  int _idx = 0; // Index of current region in the overall list
+  var stepRegions = <StepRegion>[]; // List of regions (fixed and unordered)
+
   Tasklist({required this.stepRegions});
 
+  // Returns the current active step, or null if none
   String? current() {
     return _currentStep;
   }
 
+  // Moves to the next step, advancing through regions as needed
   String? next() {
     if (_idx < stepRegions.length) {
       var next = null;
 
+      // Continue pulling steps until a non-null step is found or all regions exhausted
       while (next == null && _idx < stepRegions.length) {
         next = stepRegions[_idx].next();
         if (next != null) {
           break;
         }
-        _idx++;
+        _idx++; // Move to next region if current is exhausted
       }
       _currentStep = next;
       return next;
     } else {
-      _currentStep = null;
+      _currentStep = null; // No more steps in any region
       return null;
     }
   }
@@ -171,7 +191,6 @@ class _OBHomeState extends State<OBHome> {
   void _finishList() {
     _finished = true;
   }
-
 
   void _nextTask() {
     setState(() {
