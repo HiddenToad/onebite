@@ -29,9 +29,9 @@ class TasklistLoader {
             .toList();
   }
 
-  Future<void> saveTasklist(Tasklist tasklist) async{
+  Future<void> saveTasklist(Tasklist tasklist) async {
     final directory = await getApplicationDocumentsDirectory();
-    final tasklistDirectory = Directory('${directory.path}/tasklists');    
+    final tasklistDirectory = Directory('${directory.path}/tasklists');
     final file = File('${tasklistDirectory.path}/${tasklist.title}.json');
     final jsonString = jsonEncode(tasklist.toJson());
     _tasklistsByTitle.add(tasklist.title);

@@ -115,7 +115,7 @@ class UnorderedStepRegion extends StepRegion {
       _goal = goal;
     }
   }
-  StopMode stopMode(){
+  StopMode stopMode() {
     return _stopMode;
   }
 

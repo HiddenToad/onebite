@@ -1,6 +1,5 @@
 import 'stepregion.dart';
 
-
 // A full checklist made of multiple step regions
 class Tasklist {
   String title; //Title of the tasklist. What are we accomplishing?

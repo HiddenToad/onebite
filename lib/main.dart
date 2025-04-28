@@ -1,12 +1,8 @@
-
 import 'package:flutter/material.dart';
-
 
 import 'stepregion.dart';
 import 'tasklist.dart';
 import 'loader.dart';
-
-
 
 void main() {
   runApp(const OnebiteApp());
