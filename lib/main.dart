@@ -329,7 +329,7 @@ class _OBHomeState extends State<OBHome> {
               if (_finished) {
                 return "YAAAYY! FINISHED!";
               } else {
-                return _current_tasklist.currentStep() ?? "ERROR ERROR HOW HOW";
+                return _current_tasklist.currentStep()!;
               }
             }(), style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 20.0),
