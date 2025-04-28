@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'dart:io';
 
 List<T> randomSubset<T>(List<T> list, int n) {
   if (n >= list.length) {
@@ -32,6 +33,19 @@ sealed class StepRegion {
 
   // Returns the type of this step region (Fixed or Unordered)
   StepRegionType type();
+
+  Map<String, dynamic> toJson();
+
+  static StepRegion fromJson(Map<String, dynamic> json) {
+    switch (json['type']) {
+      case 'fixed':
+        return FixedStepRegion.fromJson(json);
+      case 'unordered':
+        return UnorderedStepRegion.fromJson(json);
+      default:
+        throw Exception('Unknown StepRegion type: ${json['type']}');
+    }
+  }
 }
 
 // A region where steps are performed in a fixed, linear order
@@ -47,6 +61,11 @@ class FixedStepRegion extends StepRegion {
     _steps.add(step);
   }
 
+  static FixedStepRegion fromJson(Map<String, dynamic> json) {
+    assert(json['type'] == 'fixed');
+    return FixedStepRegion(steps: List<String>.from(json['steps']));
+  }
+
   @override
   String? next() {
     // Return the current step and move to the next
@@ -60,6 +79,11 @@ class FixedStepRegion extends StepRegion {
   @override
   StepRegionType type() {
     return StepRegionType.Fixed;
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {"type": "fixed", "steps": _steps};
   }
 }
 
@@ -119,6 +143,30 @@ class UnorderedStepRegion extends StepRegion {
     return _goal;
   }
 
+  static UnorderedStepRegion fromJson(Map<String, dynamic> json) {
+    return UnorderedStepRegion(
+      steps: List<String>.from(json['steps']),
+      pullMode: PullMode.values.byName(json['pullMode']),
+      stopMode: StopMode.values.byName(json['stopMode']),
+      pullN: json['pullN'],
+      stopN: json['stopN'],
+      goal: json['goal'],
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'type': 'unordered',
+      'steps': _steps,
+      'pullMode': _pullMode.name,
+      'stopMode': _stopMode.name,
+      'pullN': _pullN,
+      'stopN': _stopN,
+      'goal': _goal,
+    };
+  }
+
   @override
   String? next() {
     switch (_stopMode) {
@@ -167,13 +215,14 @@ class UnorderedStepRegion extends StepRegion {
 
 // A full checklist made of multiple step regions
 class Tasklist {
+  String title; //Title of the tasklist. What are we accomplishing?
   String? _currentStep; // Currently active step
   int _idx = 0; // Index of current region in the overall list
   var _stepRegions = <StepRegion>[]; // List of regions (fixed and unordered)
 
-  Tasklist({required stepRegions}) : _stepRegions = stepRegions;
+  Tasklist({required stepRegions, required this.title})
+    : _stepRegions = stepRegions;
 
-  // Returns the current active step, or null if none
   String? currentStep() {
     return _currentStep;
   }
@@ -231,6 +280,24 @@ class Tasklist {
       return null;
     }
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'regions': _stepRegions.map((region) => region.toJson()).toList(),
+    };
+  }
+
+  static Tasklist fromJson(Map<String, dynamic> json) {
+    List<StepRegion> regions = [];
+    for (var region in json['regions']) {
+      regions.add(StepRegion.fromJson(region));
+    }
+    return Tasklist(
+      title: json['title'] ?? 'Untitled Checklist',
+      stepRegions: regions,
+    );
+  }
 }
 
 class OnebiteApp extends StatelessWidget {
@@ -265,6 +332,7 @@ class OBHome extends StatefulWidget {
 class _OBHomeState extends State<OBHome> {
   var _finished = false;
   final _current_tasklist = Tasklist(
+    title: "Clean my room",
     stepRegions: [
       FixedStepRegion(steps: ["Turn on your music", "Put down your phone"]),
       UnorderedStepRegion(
