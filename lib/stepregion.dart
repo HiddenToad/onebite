@@ -13,6 +13,8 @@ sealed class StepRegion {
 
   Map<String, dynamic> toJson();
 
+  void restart();
+
   static StepRegion fromJson(Map<String, dynamic> json) {
     switch (json['type']) {
       case 'fixed':
@@ -61,6 +63,11 @@ class FixedStepRegion extends StepRegion {
   @override
   Map<String, dynamic> toJson() {
     return {"type": "fixed", "steps": _steps};
+  }
+
+  @override
+  void restart() {
+    _idx = 0;
   }
 }
 
@@ -147,6 +154,24 @@ class UnorderedStepRegion extends StepRegion {
     };
   }
 
+
+  @override void restart(){
+    if (_pullMode == PullMode.pullRandN) {
+      assert(_pullN != null);
+      assert((_pullN!) <= _steps.length);
+      _activeSubset = randomSubset(_steps, _pullN!);
+    } else {
+      _activeSubset = randomSubset(_steps, _steps.length); //still randomize
+    }
+
+    _backupSubset = List.from(_activeSubset);
+    _subsetCycleCount = 0;  
+    goalConfirmed = false;
+    // Validation: stopN must be set if untilSetSeenNTimes mode is used
+    if (_stopMode == StopMode.untilSetSeenNTimes) {
+      assert(_stopN != null);
+    }
+  }
   @override
   String? next() {
     switch (_stopMode) {

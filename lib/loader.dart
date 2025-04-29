@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'tasklist.dart';
 import 'dart:io';
 import 'dart:convert';
@@ -7,13 +8,17 @@ class TasklistLoader {
   var _tasklistsByTitle = <String>[];
   Map<String, Tasklist> _tasklistCache = {};
 
+  List<String> getTasklistTitles(){
+    return _tasklistsByTitle;
+  }
+
   Future<void> loadTasklistTitles() async {
     final directory = await getApplicationDocumentsDirectory();
     final tasklistDirectory = Directory('${directory.path}/tasklists');
-    print(tasklistDirectory.path);
     if (!await tasklistDirectory.exists()) {
       tasklistDirectory.create(recursive: true);
     }
+    
 
     var jsonFiles =
         tasklistDirectory
@@ -41,6 +46,7 @@ class TasklistLoader {
   Future<Tasklist?> loadTasklist(String title) async {
     // Check if already loaded
     if (_tasklistCache.containsKey(title)) {
+      _tasklistCache[title]!.restart();
       return _tasklistCache[title];
     }
 
@@ -54,6 +60,7 @@ class TasklistLoader {
 
     // Cache the tasklist data for future use
     _tasklistCache[title] = tasklist;
+    
     return tasklist;
   }
 }
