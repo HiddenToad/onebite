@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'stepregion.dart';
 import 'tasklist.dart';
-import 'loader.dart';
 
 
 class TasklistPlayer extends StatefulWidget {
