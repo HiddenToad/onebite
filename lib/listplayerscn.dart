@@ -1,8 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'stepregion.dart';
 import 'tasklist.dart';
-
 
 class TasklistPlayer extends StatefulWidget {
   const TasklistPlayer({super.key, required this.tasklist});
@@ -11,15 +9,18 @@ class TasklistPlayer extends StatefulWidget {
   final String title = "onebite";
 
   @override
-  State<TasklistPlayer> createState() => _TasklistPlayerState(tasklist: tasklist);
+  State<TasklistPlayer> createState() =>
+      _TasklistPlayerState(tasklist: tasklist);
 }
 
 class _TasklistPlayerState extends State<TasklistPlayer> {
-  _TasklistPlayerState({required tasklist}) : _current_tasklist = tasklist, _finished = false;
+  _TasklistPlayerState({required tasklist})
+    : _current_tasklist = tasklist,
+      _finished = false;
 
   var _finished = false;
- 
- /* = Tasklist(
+
+  /* = Tasklist(
     title: "Clean my room",
     stepRegions: [
       FixedStepRegion(steps: ["Turn on your music", "Put down your phone"]),
@@ -95,15 +96,17 @@ class _TasklistPlayerState extends State<TasklistPlayer> {
               }
             }(), style: Theme.of(context).textTheme.headlineLarge),
             const SizedBox(height: 20.0),
-            (!_finished ? ElevatedButton(
-              onPressed: _nextTask,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                minimumSize: Size(95, 50),
-              ),
-              child: const Icon(Icons.done),
-            ): SizedBox.shrink()),
+            (!_finished
+                ? ElevatedButton(
+                  onPressed: _nextTask,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    minimumSize: Size(95, 50),
+                  ),
+                  child: const Icon(Icons.done),
+                )
+                : SizedBox.shrink()),
           ],
         ),
       ),

@@ -154,8 +154,8 @@ class UnorderedStepRegion extends StepRegion {
     };
   }
 
-
-  @override void restart(){
+  @override
+  void restart() {
     if (_pullMode == PullMode.pullRandN) {
       assert(_pullN != null);
       assert((_pullN!) <= _steps.length);
@@ -165,13 +165,14 @@ class UnorderedStepRegion extends StepRegion {
     }
 
     _backupSubset = List.from(_activeSubset);
-    _subsetCycleCount = 0;  
+    _subsetCycleCount = 0;
     goalConfirmed = false;
     // Validation: stopN must be set if untilSetSeenNTimes mode is used
     if (_stopMode == StopMode.untilSetSeenNTimes) {
       assert(_stopN != null);
     }
   }
+
   @override
   String? next() {
     switch (_stopMode) {

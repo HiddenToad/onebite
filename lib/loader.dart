@@ -7,7 +7,7 @@ class TasklistLoader {
   var _tasklistsByTitle = <String>[];
   Map<String, Tasklist> _tasklistCache = {};
 
-  List<String> getTasklistTitles(){
+  List<String> getTasklistTitles() {
     return _tasklistsByTitle;
   }
 
@@ -17,7 +17,6 @@ class TasklistLoader {
     if (!await tasklistDirectory.exists()) {
       tasklistDirectory.create(recursive: true);
     }
-    
 
     var jsonFiles =
         tasklistDirectory
@@ -59,7 +58,7 @@ class TasklistLoader {
 
     // Cache the tasklist data for future use
     _tasklistCache[title] = tasklist;
-    
+
     return tasklist;
   }
 }

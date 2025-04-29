@@ -10,17 +10,17 @@ class Tasklist {
   Tasklist({required stepRegions, required this.title})
     : _stepRegions = stepRegions;
 
-
-  void restart(){
+  void restart() {
     _idx = 0;
-    for (var region in _stepRegions){
+    for (var region in _stepRegions) {
       region.restart();
     }
   }
 
-  int getIdx(){
+  int getIdx() {
     return _idx;
   }
+
   String? currentStep() {
     return _currentStep;
   }

@@ -89,15 +89,25 @@ class _TasklistLibraryState extends State<TasklistLibrary> {
                     ),
                     const SizedBox(height: 25.0),
 
-                    ElevatedButton(onPressed: (){ 
-                      //TODO: load creator scene
-                    }, 
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                      minimumSize: Size(125, 55),
+                    ElevatedButton(
+                      onPressed: () {
+                        //TODO: load creator scene
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
+                        minimumSize: Size(125, 55),
+                      ),
+                      child: Text(
+                        "Let's make one",
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleMedium!.copyWith(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
                     ),
-                    child: Text("Let's make one", style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Theme.of(context).colorScheme.onPrimary))),
                   ],
                 ),
               ),
