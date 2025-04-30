@@ -17,7 +17,7 @@ class Bite {
     }
   }
 
-  List<StepRegion> getRegions(){
+  List<StepRegion> getRegions() {
     return _stepRegions;
   }
 
