@@ -159,8 +159,9 @@ class _BiteBuilderState extends State<BiteBuilder> {
               child: TextFormField(
                 initialValue:
                     (lastSavedBite
-                        ?.getRegions()[idx - 1]
-                        .upcastUnordered()
+                        ?.getRegions()
+                        .elementAtOrNull(idx - 1)
+                        ?.upcastUnordered()
                         ?.getPullN()
                         .toString()),
                 decoration: const InputDecoration(
@@ -200,8 +201,9 @@ class _BiteBuilderState extends State<BiteBuilder> {
               child: TextFormField(
                 initialValue:
                     (lastSavedBite
-                        ?.getRegions()[idx - 1]
-                        .upcastUnordered()
+                        ?.getRegions()
+                        .elementAtOrNull(idx - 1)
+                        ?.upcastUnordered()
                         ?.getStopN()
                         .toString()),
 
@@ -226,8 +228,9 @@ class _BiteBuilderState extends State<BiteBuilder> {
               child: TextFormField(
                 initialValue:
                     (lastSavedBite
-                            ?.getRegions()[idx - 1]
-                            .upcastUnordered()
+                            ?.getRegions()
+                            .elementAtOrNull(idx - 1)
+                            ?.upcastUnordered()
                             ?.goalText()
                             ?.toString() ??
                         ""),
