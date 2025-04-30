@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:onebite/listbuilderscn.dart';
+import 'package:onebite/bitebuilderscn.dart';
 import 'loader.dart';
 import 'bite.dart';
-import 'listplayerscn.dart';
+import 'biteplayerscn.dart';
 
 class BiteLibrary extends StatefulWidget {
   const BiteLibrary({super.key});
@@ -41,13 +41,18 @@ class _BiteLibraryState extends State<BiteLibrary> {
             padding: EdgeInsets.only(right: 20),
             child: IconButton(
               tooltip: 'New Bite',
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => BiteBuilder(key: UniqueKey()),
                   ),
                 );
+                await _loader.loadBiteTitles();
+                setState(() {
+                  _BiteTitles = _loader.getBiteTitles();
+                });
+
               },
               icon: const Icon(Icons.edit),
             ),
@@ -56,12 +61,14 @@ class _BiteLibraryState extends State<BiteLibrary> {
       ),
       body:
           _BiteTitles.length > 0
-              ? ListView.builder(
+              ? Padding(
+                padding: EdgeInsets.only(top: 40),
+              child: ListView.builder(
                 itemCount: _BiteTitles.length,
                 itemBuilder: (context, index) {
                   final title = _BiteTitles[index];
                   return Padding(
-                    padding: const EdgeInsets.all(42.0),
+                    padding: const EdgeInsets.only(left: 40, right: 40, bottom: 7),
                     child: Card(
                       elevation: 4,
                       shape: RoundedRectangleBorder(
@@ -87,7 +94,7 @@ class _BiteLibraryState extends State<BiteLibrary> {
                     ),
                   );
                 },
-              )
+              ))
               : Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -105,13 +112,19 @@ class _BiteLibraryState extends State<BiteLibrary> {
                     const SizedBox(height: 25.0),
 
                     ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
+                      onPressed: () async {
+                        await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => BiteBuilder(key: UniqueKey()),
                           ),
                         );
+                        await _loader.loadBiteTitles();
+                        setState(() {
+                          _BiteTitles = _loader.getBiteTitles();
+                        });
+
+
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
