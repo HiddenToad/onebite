@@ -30,8 +30,6 @@ class _BiteLibraryState extends State<BiteLibrary> {
 
   @override
   Widget build(BuildContext context) {
-    print("MEOW");
-    print(_BiteTitles);
     return Scaffold(
       appBar: AppBar(
         title: Text("My Bites"),

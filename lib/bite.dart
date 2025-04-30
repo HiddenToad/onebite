@@ -7,7 +7,7 @@ class Bite {
   int _idx = 0; // Index of current region in the overall list
   var _stepRegions = <StepRegion>[]; // List of regions (fixed and unordered)
 
-  Bite({required stepRegions, required this.title})
+  Bite({required List<StepRegion> stepRegions, required this.title})
     : _stepRegions = stepRegions;
 
   void restart() {
@@ -15,6 +15,10 @@ class Bite {
     for (var region in _stepRegions) {
       region.restart();
     }
+  }
+
+  List<StepRegion> getRegions(){
+    return _stepRegions;
   }
 
   int getIdx() {

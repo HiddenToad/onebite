@@ -6,20 +6,57 @@ import 'stepregion.dart';
 import 'loader.dart';
 
 class BiteBuilder extends StatefulWidget {
-  const BiteBuilder({super.key});
-
+  const BiteBuilder({super.key, this.lastSavedBite});
+  final Bite? lastSavedBite;
   @override
-  State<BiteBuilder> createState() => _BiteBuilderState();
+  State<BiteBuilder> createState() => _BiteBuilderState(lastSavedBite: lastSavedBite);
 }
 
 class _BiteBuilderState extends State<BiteBuilder> {
+  _BiteBuilderState({this.lastSavedBite});
+
+
+  Bite? lastSavedBite;
   var regions = <StepRegion>[];
   var loader = BiteLoader();
   late List<DropdownMenuItem<PullMode>> _pullModeItems;
   late List<DropdownMenuItem<StopMode>> _stopModeItems;
 
+  bool isDirty(){
+    if (regions.isEmpty) return false;
+    if (lastSavedBite == null) return true;
+    if (Bite(stepRegions: regions, title: "").toJson()['regions'].toString() == lastSavedBite!.toJson()['regions'].toString()) return false;
+
+    return true;
+  }
+
+  void confirmSave() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Saved!",  style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Theme.of(context).colorScheme.primary)),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+    );
+  }
+  
+  Future<void> save() async{
+     String prevtitle = (lastSavedBite ?? Bite(stepRegions: [], title: "")).title;
+     if (prevtitle.isEmpty){
+        await saveDialog();
+     } else {
+        var createdBite = Bite(title: prevtitle, stepRegions: List.from(regions));
+        setState((){
+          lastSavedBite = Bite.fromJson(createdBite.toJson());
+        });
+        await loader.saveBite(createdBite);
+        confirmSave();
+     }
+  }
+  
   Future<void> saveDialog() async{
-      final controller = TextEditingController();
+      String prevtitle = (lastSavedBite ?? Bite(stepRegions: [], title: "")).title;
+
+      final controller = TextEditingController(text: prevtitle);
       final title = await showDialog<String>(
         context: context,
         builder:
@@ -53,8 +90,13 @@ class _BiteBuilderState extends State<BiteBuilder> {
             ),
       );
       if (title != null) {
-        var createdBite = Bite(title: title, stepRegions: regions);
-        loader.saveBite(createdBite);
+        var createdBite = Bite(title: title, stepRegions: List.from(regions));
+        setState((){
+          lastSavedBite = Bite.fromJson(createdBite.toJson());
+        });
+        
+        await loader.saveBite(createdBite);
+        confirmSave();
       }
 
   }
@@ -171,13 +213,11 @@ class _BiteBuilderState extends State<BiteBuilder> {
 
   @override
   Widget build(BuildContext context) {
-
    return PopScope(
-    canPop: regions.isEmpty, // prevent auto-pop while we handle it manually
+    canPop: !isDirty(), // prevent auto-pop while we handle it manually
     onPopInvokedWithResult: (bool didPop, Object? result) async {
       if (didPop) return;
       if (regions.isEmpty) return;
-      print("Pop");
       final shouldLeave = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
@@ -191,12 +231,12 @@ class _BiteBuilderState extends State<BiteBuilder> {
             ),
             TextButton(
               onPressed: () async {
-                await saveDialog();
+                await save();
                 if(!mounted) return;
                 Navigator.of(context).pop(true);
               },
               style: TextButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.inversePrimary),
-              child: const Text("Save As"),
+              child: const Text("Save"),
             ),
           ],
         ),
@@ -212,11 +252,14 @@ class _BiteBuilderState extends State<BiteBuilder> {
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 20),
-            child: IconButton(
+            child: Row(children: [
+            IconButton(tooltip: 'Save', onPressed: save, icon: const Icon(Icons.save),),
+            IconButton(
               tooltip: 'Save As',
               onPressed: saveDialog,
               icon: const Icon(Icons.save_as),
-            ),
+            ), 
+            ]),
           ),
         ],
       ),
@@ -399,7 +442,9 @@ class _BiteBuilderState extends State<BiteBuilder> {
                                               TextPosition(offset: text.length),
                                             ),
                                       onChanged: (val) {
-                                        region.setNthStep(i, val);
+                                        setState((){
+                                          region.setNthStep(i, val);
+                                        });
                                       },
                                     ),
                                   ),
