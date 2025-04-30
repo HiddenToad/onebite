@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:onebite/listbuilderscn.dart';
 import 'loader.dart';
-import 'tasklist.dart';
+import 'bite.dart';
 import 'listplayerscn.dart';
 
-class TasklistLibrary extends StatefulWidget {
-  const TasklistLibrary({super.key});
+class BiteLibrary extends StatefulWidget {
+  const BiteLibrary({super.key});
 
   @override
-  State<TasklistLibrary> createState() => _TasklistLibraryState();
+  State<BiteLibrary> createState() => _BiteLibraryState();
 }
 
-class _TasklistLibraryState extends State<TasklistLibrary> {
-  List<String> _tasklistTitles = [];
-  TasklistLoader _loader = TasklistLoader();
+class _BiteLibraryState extends State<BiteLibrary> {
+  List<String> _BiteTitles = [];
+  BiteLoader _loader = BiteLoader();
 
   @override
   void initState() {
     super.initState();
     () async {
-      await _loader.loadTasklistTitles();
+      await _loader.loadBiteTitles();
 
       if (!mounted) return;
       setState(() {
-        _tasklistTitles = _loader.getTasklistTitles();
+        _BiteTitles = _loader.getBiteTitles();
       });
     }();
   }
@@ -30,18 +31,35 @@ class _TasklistLibraryState extends State<TasklistLibrary> {
   @override
   Widget build(BuildContext context) {
     print("MEOW");
-    print(_tasklistTitles);
+    print(_BiteTitles);
     return Scaffold(
       appBar: AppBar(
-        title: Text("My Onebites"),
+        title: Text("My Bites"),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: 20),
+            child: IconButton(
+              tooltip: 'New Bite',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BiteBuilder(key: UniqueKey()),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.edit),
+            ),
+          ),
+        ],
       ),
       body:
-          _tasklistTitles.length > 0
+          _BiteTitles.length > 0
               ? ListView.builder(
-                itemCount: _tasklistTitles.length,
+                itemCount: _BiteTitles.length,
                 itemBuilder: (context, index) {
-                  final title = _tasklistTitles[index];
+                  final title = _BiteTitles[index];
                   return Padding(
                     padding: const EdgeInsets.all(42.0),
                     child: Card(
@@ -53,18 +71,15 @@ class _TasklistLibraryState extends State<TasklistLibrary> {
                       child: ListTile(
                         title: Text(title),
                         onTap: () async {
-                          // Navigate to tasklist view
-                          Tasklist tasklist =
-                              (await _loader.loadTasklist(title))!;
+                          // Navigate to Bite view
+                          Bite bite = (await _loader.loadBite(title))!;
                           if (!mounted) return;
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder:
-                                  (_) => TasklistPlayer(
-                                    key: UniqueKey(),
-                                    tasklist: tasklist,
-                                  ),
+                                  (_) =>
+                                      BitePlayer(key: UniqueKey(), bite: bite),
                             ),
                           );
                         },
@@ -78,7 +93,7 @@ class _TasklistLibraryState extends State<TasklistLibrary> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "You don't have any onebites yet.",
+                      "You don't have any Bites yet.",
                       style: Theme.of(
                         context,
                       ).textTheme.headlineLarge!.copyWith(
@@ -91,7 +106,12 @@ class _TasklistLibraryState extends State<TasklistLibrary> {
 
                     ElevatedButton(
                       onPressed: () {
-                        //TODO: load creator scene
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BiteBuilder(key: UniqueKey()),
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,

@@ -1,30 +1,30 @@
-import 'tasklist.dart';
+import 'bite.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 
-class TasklistLoader {
-  var _tasklistsByTitle = <String>[];
-  Map<String, Tasklist> _tasklistCache = {};
+class BiteLoader {
+  var _BitesByTitle = <String>[];
+  Map<String, Bite> _BiteCache = {};
 
-  List<String> getTasklistTitles() {
-    return _tasklistsByTitle;
+  List<String> getBiteTitles() {
+    return _BitesByTitle;
   }
 
-  Future<void> loadTasklistTitles() async {
+  Future<void> loadBiteTitles() async {
     final directory = await getApplicationDocumentsDirectory();
-    final tasklistDirectory = Directory('${directory.path}/tasklists');
-    if (!await tasklistDirectory.exists()) {
-      tasklistDirectory.create(recursive: true);
+    final BiteDirectory = Directory('${directory.path}/Bites');
+    if (!await BiteDirectory.exists()) {
+      BiteDirectory.create(recursive: true);
     }
 
     var jsonFiles =
-        tasklistDirectory
+        BiteDirectory
             .listSync()
             .where((entity) => entity.path.endsWith('.json'))
             .toList();
 
-    _tasklistsByTitle =
+    _BitesByTitle =
         jsonFiles
             .map(
               (file) => file.uri.pathSegments.last.split('.').first,
@@ -32,33 +32,34 @@ class TasklistLoader {
             .toList();
   }
 
-  Future<void> saveTasklist(Tasklist tasklist) async {
+  Future<void> saveBite(Bite Bite) async {
     final directory = await getApplicationDocumentsDirectory();
-    final tasklistDirectory = Directory('${directory.path}/tasklists');
-    final file = File('${tasklistDirectory.path}/${tasklist.title}.json');
-    final jsonString = jsonEncode(tasklist.toJson());
-    _tasklistsByTitle.add(tasklist.title);
+    final BiteDirectory = Directory('${directory.path}/Bites');
+    final file = File('${BiteDirectory.path}/${Bite.title}.json');
+    final jsonString = jsonEncode(Bite.toJson());
+    _BitesByTitle.add(Bite.title);
     await file.writeAsString(jsonString);
+    await loadBiteTitles();
   }
 
-  Future<Tasklist?> loadTasklist(String title) async {
+  Future<Bite?> loadBite(String title) async {
     // Check if already loaded
-    if (_tasklistCache.containsKey(title)) {
-      _tasklistCache[title]!.restart();
-      return _tasklistCache[title];
+    if (_BiteCache.containsKey(title)) {
+      _BiteCache[title]!.restart();
+      return _BiteCache[title];
     }
 
     // Read the file and decode
     final directory = await getApplicationDocumentsDirectory();
-    final filePath = '${directory.path}/tasklists/$title.json';
+    final filePath = '${directory.path}/Bites/$title.json';
     final fileContent = await File(filePath).readAsString();
     final json = jsonDecode(fileContent);
 
-    final tasklist = Tasklist.fromJson(json);
+    final bite = Bite.fromJson(json);
 
-    // Cache the tasklist data for future use
-    _tasklistCache[title] = tasklist;
+    // Cache the Bite data for future use
+    _BiteCache[title] = bite;
 
-    return tasklist;
+    return bite;
   }
 }

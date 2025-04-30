@@ -19,7 +19,7 @@ class OnebiteApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
       ),
-      home: const TasklistLibrary(),
+      home: const BiteLibrary(),
     );
   }
 }

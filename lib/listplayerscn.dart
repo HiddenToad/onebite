@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 import 'stepregion.dart';
-import 'tasklist.dart';
+import 'bite.dart';
 
-class TasklistPlayer extends StatefulWidget {
-  const TasklistPlayer({super.key, required this.tasklist});
+class BitePlayer extends StatefulWidget {
+  const BitePlayer({super.key, required this.bite});
 
-  final Tasklist tasklist;
+  final Bite bite;
   final String title = "onebite";
 
   @override
-  State<TasklistPlayer> createState() =>
-      _TasklistPlayerState(tasklist: tasklist);
+  State<BitePlayer> createState() =>
+      _BitePlayerState(bite: bite);
 }
 
-class _TasklistPlayerState extends State<TasklistPlayer> {
-  _TasklistPlayerState({required tasklist})
-    : _current_tasklist = tasklist,
+class _BitePlayerState extends State<BitePlayer> {
+  _BitePlayerState({required bite})
+    : _current_bite = bite,
       _finished = false;
 
   var _finished = false;
 
-  /* = Tasklist(
+  /* = Bite(
     title: "Clean my room",
     stepRegions: [
       FixedStepRegion(steps: ["Turn on your music", "Put down your phone"]),
@@ -43,23 +43,23 @@ class _TasklistPlayerState extends State<TasklistPlayer> {
     ],
   )*/
 
-  Tasklist _current_tasklist;
+  Bite _current_bite;
 
   void _finishList() {
     _finished = true;
-    //_loader.saveTasklist(_current_tasklist);
+    //_loader.saveBite(_current_bite);
   }
 
   void confirmGoal() {
     setState(() {
-      _current_tasklist.confirmGoal();
+      _current_bite.confirmGoal();
     });
     _nextTask();
   }
 
   void _nextTask() {
     setState(() {
-      if (_current_tasklist.next() == null) {
+      if (_current_bite.next() == null) {
         _finishList();
       }
     });
@@ -70,8 +70,8 @@ class _TasklistPlayerState extends State<TasklistPlayer> {
     super.initState();
     setState(() {
       _finished = false;
-      _current_tasklist = widget.tasklist;
-      _current_tasklist.restart();
+      _current_bite = widget.bite;
+      _current_bite.restart();
     });
     _nextTask();
   }
@@ -92,7 +92,7 @@ class _TasklistPlayerState extends State<TasklistPlayer> {
               if (_finished) {
                 return "YAAAYY! FINISHED!";
               } else {
-                return _current_tasklist.currentStep()!;
+                return _current_bite.currentStep()!;
               }
             }(), style: Theme.of(context).textTheme.headlineLarge),
             const SizedBox(height: 20.0),
@@ -118,12 +118,12 @@ class _TasklistPlayerState extends State<TasklistPlayer> {
       //This is the goal thumbs up and goal text
       //that appears while waiting on goal conf.
       floatingActionButton:
-          (_current_tasklist.currentRegionStopMode() == StopMode.untilGoalConf
+          (_current_bite.currentRegionStopMode() == StopMode.untilGoalConf
               ? Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    _current_tasklist.currentRegionGoalText()!,
+                    _current_bite.currentRegionGoalText()!,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 24),

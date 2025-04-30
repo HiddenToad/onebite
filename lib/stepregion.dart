@@ -15,6 +15,12 @@ sealed class StepRegion {
 
   void restart();
 
+  List<String> getSteps();
+
+  void addStep(String step);
+
+  void setNthStep(int idx, String step);
+
   static StepRegion fromJson(Map<String, dynamic> json) {
     switch (json['type']) {
       case 'fixed':
@@ -36,8 +42,17 @@ class FixedStepRegion extends StepRegion {
   FixedStepRegion({required List<String> steps}) : _steps = steps;
 
   // Adds a new step at the end of the list
-  void addStep(step) {
+  @override
+  void addStep(String step) {
     _steps.add(step);
+  }
+
+  @override void setNthStep(int idx, String step){
+    _steps[idx] = step;
+  }
+  @override
+  List<String> getSteps() {
+    return _steps;
   }
 
   static FixedStepRegion fromJson(Map<String, dynamic> json) {
@@ -72,10 +87,26 @@ class FixedStepRegion extends StepRegion {
 }
 
 // Set-building modes for unordered step regions
-enum PullMode { pullRandN, pullAll }
+enum PullMode {
+   pullRandN, pullAll;
+  String asLabel(){
+    return switch(this){
+      PullMode.pullRandN => "A specific number of steps",
+      PullMode.pullAll => "All steps"
+    };
+  }
+ }
 
 // Stop conditions for unordered step regions
-enum StopMode { untilGoalConf, untilSetSeen, untilSetSeenNTimes }
+enum StopMode { untilGoalConf, untilSetSeen, untilSetSeenNTimes;
+ String asLabel(){
+    return switch(this){
+      StopMode.untilGoalConf => "Once a specific goal is achieved",
+      StopMode.untilSetSeen => "Once all steps have been seen once",
+      StopMode.untilSetSeenNTimes => "Once all steps have been seen a chosen number of times"
+    };
+  } 
+  }
 
 // A region where steps are performed in an unordered/randomized fashion
 class UnorderedStepRegion extends StepRegion {
@@ -130,6 +161,42 @@ class UnorderedStepRegion extends StepRegion {
     return _goal;
   }
 
+  PullMode getPullMode(){
+    return _pullMode;
+  }
+  void setPullMode(PullMode mode){
+    _pullMode = mode;
+  }
+
+  StopMode getStopMode(){
+    return _stopMode;
+  }
+  void setStopMode(StopMode mode){
+    _stopMode = mode;
+  }
+
+  void setPullN(int n){
+    _pullN = n;
+  }
+
+  int getPullN(){
+    return _pullN ?? -1;
+  }
+
+  void setStopN(int n){
+    _stopN = n;
+  }
+
+  int getStopN(){
+    return _stopN ?? -1;
+  }
+  
+
+  void setGoal(String goal){
+    _goal = goal;
+  }
+
+
   static UnorderedStepRegion fromJson(Map<String, dynamic> json) {
     return UnorderedStepRegion(
       steps: List<String>.from(json['steps']),
@@ -141,6 +208,18 @@ class UnorderedStepRegion extends StepRegion {
     );
   }
 
+  
+  @override
+  void addStep(String step) {
+    _steps.add(step);
+  }
+  @override void setNthStep(int idx, String step){
+    _steps[idx] = step;
+  }
+  @override
+  List<String> getSteps() {
+    return _steps;
+  }
   @override
   Map<String, dynamic> toJson() {
     return {
