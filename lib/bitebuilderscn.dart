@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'bite.dart';
 import 'stepregion.dart';
@@ -16,6 +17,47 @@ class _BiteBuilderState extends State<BiteBuilder> {
   var loader = BiteLoader();
   late List<DropdownMenuItem<PullMode>> _pullModeItems;
   late List<DropdownMenuItem<StopMode>> _stopModeItems;
+
+  Future<void> saveDialog() async{
+      final controller = TextEditingController();
+      final title = await showDialog<String>(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [const Text("Save Bite As")],
+              ),
+              content: FractionallySizedBox(
+                widthFactor: 0.75,
+                child: TextField(
+                  controller: controller,
+                  decoration: const InputDecoration(
+                    labelText: "Title",
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 1,
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.done,
+                  scrollPhysics:
+                      const AlwaysScrollableScrollPhysics(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed:
+                      () => Navigator.pop(context, controller.text),
+                  child: Text('Save'),
+                ),
+              ],
+            ),
+      );
+      if (title != null) {
+        var createdBite = Bite(title: title, stepRegions: regions);
+        loader.saveBite(createdBite);
+      }
+
+  }
 
   @override
   void initState() {
@@ -129,7 +171,41 @@ class _BiteBuilderState extends State<BiteBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+
+   return PopScope(
+    canPop: regions.isEmpty, // prevent auto-pop while we handle it manually
+    onPopInvokedWithResult: (bool didPop, Object? result) async {
+      if (didPop) return;
+      if (regions.isEmpty) return;
+      print("Pop");
+      final shouldLeave = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Save your Bite?"),
+          content: const Text("You have unsaved changes. Do you want to save this Bite before leaving?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.outline),
+              child: Text("Exit Without Saving", style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Theme.of(context).colorScheme.surface)),
+            ),
+            TextButton(
+              onPressed: () async {
+                await saveDialog();
+                if(!mounted) return;
+                Navigator.of(context).pop(true);
+              },
+              style: TextButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.inversePrimary),
+              child: const Text("Save As"),
+            ),
+          ],
+        ),
+      );
+      if (shouldLeave ?? false){
+        Navigator.of(context).pop();
+      }
+    },
+    child:  Scaffold(
       appBar: AppBar(
         title: Text("Bite Builder"),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -138,45 +214,7 @@ class _BiteBuilderState extends State<BiteBuilder> {
             padding: EdgeInsets.only(right: 20),
             child: IconButton(
               tooltip: 'Save As',
-              onPressed: () async {
-                final controller = TextEditingController();
-                final title = await showDialog<String>(
-                  context: context,
-                  builder:
-                      (context) => AlertDialog(
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [const Text("Save Bite As")],
-                        ),
-                        content: FractionallySizedBox(
-                          widthFactor: 0.75,
-                          child: TextField(
-                            controller: controller,
-                            decoration: const InputDecoration(
-                              labelText: "Title",
-                              border: OutlineInputBorder(),
-                            ),
-                            maxLines: 1,
-                            keyboardType: TextInputType.text,
-                            textInputAction: TextInputAction.done,
-                            scrollPhysics:
-                                const AlwaysScrollableScrollPhysics(),
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed:
-                                () => Navigator.pop(context, controller.text),
-                            child: Text('Save'),
-                          ),
-                        ],
-                      ),
-                );
-                if (title != null) {
-                  var createdBite = Bite(title: title, stepRegions: regions);
-                  loader.saveBite(createdBite);
-                }
-              },
+              onPressed: saveDialog,
               icon: const Icon(Icons.save_as),
             ),
           ),
@@ -385,6 +423,7 @@ class _BiteBuilderState extends State<BiteBuilder> {
               }());
         },
       ),
+    )
     );
   }
 }
