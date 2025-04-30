@@ -6,16 +6,17 @@ import 'stepregion.dart';
 import 'loader.dart';
 
 class BiteBuilder extends StatefulWidget {
-  const BiteBuilder({super.key, this.lastSavedBite});
+  const BiteBuilder({super.key, this.lastSavedBite, required this.editing});
   final Bite? lastSavedBite;
+  final bool editing;
   @override
   State<BiteBuilder> createState() =>
-      _BiteBuilderState(lastSavedBite: lastSavedBite);
+      _BiteBuilderState(lastSavedBite: lastSavedBite, editing: editing);
 }
 
 class _BiteBuilderState extends State<BiteBuilder> {
-  _BiteBuilderState({this.lastSavedBite});
-
+  _BiteBuilderState({this.lastSavedBite, required this.editing});
+  bool editing;
   Bite? lastSavedBite;
   var regions = <StepRegion>[];
   var loader = BiteLoader();
@@ -26,8 +27,9 @@ class _BiteBuilderState extends State<BiteBuilder> {
     if (regions.isEmpty) return false;
     if (lastSavedBite == null) return true;
     if (Bite(stepRegions: regions, title: "").toJson()['regions'].toString() ==
-        lastSavedBite!.toJson()['regions'].toString())
+        lastSavedBite!.toJson()['regions'].toString()) {
       return false;
+    }
 
     return true;
   }
@@ -53,10 +55,10 @@ class _BiteBuilderState extends State<BiteBuilder> {
       await saveDialog();
     } else {
       var createdBite = Bite(title: prevtitle, stepRegions: List.from(regions));
+      await loader.saveBite(createdBite);
       setState(() {
         lastSavedBite = Bite.fromJson(createdBite.toJson());
       });
-      await loader.saveBite(createdBite);
       confirmSave();
     }
   }
@@ -98,11 +100,13 @@ class _BiteBuilderState extends State<BiteBuilder> {
     );
     if (title != null) {
       var createdBite = Bite(title: title, stepRegions: List.from(regions));
+      await loader.saveBite(createdBite);
+      if (editing) {
+        await loader.deleteBite(lastSavedBite!.title);
+      }
       setState(() {
         lastSavedBite = Bite.fromJson(createdBite.toJson());
       });
-
-      await loader.saveBite(createdBite);
       confirmSave();
     }
   }
@@ -110,6 +114,12 @@ class _BiteBuilderState extends State<BiteBuilder> {
   @override
   void initState() {
     super.initState();
+    if (lastSavedBite != null) {
+      setState(() {
+        regions = Bite.fromJson(lastSavedBite!.toJson()).getRegions();
+      });
+    }
+
     _pullModeItems =
         PullMode.values.map((mode) {
           return DropdownMenuItem(value: mode, child: Text(mode.asLabel()));
@@ -121,7 +131,7 @@ class _BiteBuilderState extends State<BiteBuilder> {
         }).toList();
   }
 
-  Widget _buildUnorderedControls(UnorderedStepRegion region) {
+  Widget _buildUnorderedControls(UnorderedStepRegion region, int idx) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -146,7 +156,13 @@ class _BiteBuilderState extends State<BiteBuilder> {
             padding: const EdgeInsets.only(top: 8.0),
             child: FractionallySizedBox(
               widthFactor: 0.5,
-              child: TextField(
+              child: TextFormField(
+                initialValue:
+                    (lastSavedBite
+                        ?.getRegions()[idx - 1]
+                        .upcastUnordered()
+                        ?.getPullN()
+                        .toString()),
                 decoration: const InputDecoration(
                   labelText: "# of steps",
                   border: OutlineInputBorder(),
@@ -181,7 +197,14 @@ class _BiteBuilderState extends State<BiteBuilder> {
             padding: const EdgeInsets.only(top: 8.0),
             child: FractionallySizedBox(
               widthFactor: 0.5,
-              child: TextField(
+              child: TextFormField(
+                initialValue:
+                    (lastSavedBite
+                        ?.getRegions()[idx - 1]
+                        .upcastUnordered()
+                        ?.getStopN()
+                        .toString()),
+
                 decoration: const InputDecoration(
                   labelText: "# of times to show steps",
                   border: OutlineInputBorder(),
@@ -200,7 +223,15 @@ class _BiteBuilderState extends State<BiteBuilder> {
             padding: const EdgeInsets.only(top: 8.0),
             child: FractionallySizedBox(
               widthFactor: 0.5,
-              child: TextField(
+              child: TextFormField(
+                initialValue:
+                    (lastSavedBite
+                            ?.getRegions()[idx - 1]
+                            .upcastUnordered()
+                            ?.goalText()
+                            ?.toString() ??
+                        ""),
+
                 decoration: const InputDecoration(
                   labelText: "Goal question (ex: 'Is the sink empty?')",
                   border: OutlineInputBorder(),
@@ -440,7 +471,7 @@ class _BiteBuilderState extends State<BiteBuilder> {
                               ],
                             ),
                             if (region is UnorderedStepRegion)
-                              _buildUnorderedControls(region),
+                              _buildUnorderedControls(region, index),
 
                             const SizedBox(height: 40),
                             ...region.getSteps().asMap().entries.map((entry) {

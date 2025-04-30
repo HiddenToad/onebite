@@ -23,6 +23,9 @@ sealed class StepRegion {
 
   void removeStep(int idx);
 
+  FixedStepRegion? upcastFixed();
+  UnorderedStepRegion? upcastUnordered();
+
   static StepRegion fromJson(Map<String, dynamic> json) {
     switch (json['type']) {
       case 'fixed':
@@ -42,6 +45,16 @@ class FixedStepRegion extends StepRegion {
 
   // Constructor
   FixedStepRegion({required List<String> steps}) : _steps = steps;
+
+  @override
+  FixedStepRegion? upcastFixed() {
+    return this;
+  }
+
+  @override
+  UnorderedStepRegion? upcastUnordered() {
+    return null;
+  }
 
   // Adds a new step at the end of the list
   @override
@@ -222,6 +235,16 @@ class UnorderedStepRegion extends StepRegion {
       stopN: json['stopN'],
       goal: json['goal'],
     );
+  }
+
+  @override
+  FixedStepRegion? upcastFixed() {
+    return null;
+  }
+
+  @override
+  UnorderedStepRegion? upcastUnordered() {
+    return this;
   }
 
   @override

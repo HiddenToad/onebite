@@ -11,7 +11,16 @@ class BiteLoader {
     return _BitesByTitle;
   }
 
+  void clearCache({String? title}) {
+    if (title != null) {
+      _BiteCache.remove(title);
+    } else {
+      _BiteCache = {};
+    }
+  }
+
   Future<void> loadBiteTitles() async {
+    clearCache();
     final directory = await getApplicationDocumentsDirectory();
     final BiteDirectory = Directory('${directory.path}/Bites');
     if (!await BiteDirectory.exists()) {
@@ -39,6 +48,15 @@ class BiteLoader {
     _BitesByTitle.add(Bite.title);
     await file.writeAsString(jsonString);
     await loadBiteTitles();
+    clearCache();
+  }
+
+  Future<void> deleteBite(String title) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/Bites/$title.json';
+    final biteFile = File(filePath);
+    await biteFile.delete();
+    clearCache(title: title);
   }
 
   Future<Bite?> loadBite(String title) async {

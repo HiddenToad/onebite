@@ -43,7 +43,9 @@ class _BiteLibraryState extends State<BiteLibrary> {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => BiteBuilder(key: UniqueKey()),
+                    builder:
+                        (context) =>
+                            BiteBuilder(key: UniqueKey(), editing: false),
                   ),
                 );
                 await _loader.loadBiteTitles();
@@ -57,7 +59,7 @@ class _BiteLibraryState extends State<BiteLibrary> {
         ],
       ),
       body:
-          _BiteTitles.length > 0
+          _BiteTitles.isNotEmpty
               ? Padding(
                 padding: EdgeInsets.only(top: 40),
                 child: ListView.builder(
@@ -78,8 +80,153 @@ class _BiteLibraryState extends State<BiteLibrary> {
                         color: Theme.of(context).colorScheme.onPrimary,
                         child: ListTile(
                           title: Text(title),
+                          trailing: PopupMenuButton<String>(
+                            icon: Icon(
+                              Icons.more_horiz,
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                            onSelected: (value) async {
+                              if (value == 'edit') {
+                                final bite = await _loader.loadBite(title);
+                                if (!mounted || bite == null) return;
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (_) => BiteBuilder(
+                                          key: UniqueKey(),
+                                          lastSavedBite: bite,
+                                          editing: true,
+                                        ),
+                                  ),
+                                );
+                                await _loader.loadBiteTitles();
+                                setState(() {
+                                  _BiteTitles = _loader.getBiteTitles();
+                                }); // Refresh list
+                              } else if (value == 'delete') {
+                                // Optional: Confirm deletion with user
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder:
+                                      (_) => AlertDialog(
+                                        title: Text("Delete Bite"),
+                                        content: Text(
+                                          "Are you sure you want to delete '$title'?",
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed:
+                                                () => Navigator.pop(
+                                                  context,
+                                                  false,
+                                                ),
+                                            child: Text("Cancel"),
+                                          ),
+                                          TextButton(
+                                            onPressed:
+                                                () => Navigator.pop(
+                                                  context,
+                                                  true,
+                                                ),
+                                            child: Text(
+                                              "Delete",
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                );
+                                if (confirm == true) {
+                                  await _loader.deleteBite(title);
+                                  await _loader.loadBiteTitles();
+                                  setState(() {
+                                    _BiteTitles = _loader.getBiteTitles();
+                                  }); // Refresh list
+                                }
+                              } else if (value == 'rename') {
+                                final controller = TextEditingController(
+                                  text: title,
+                                );
+                                final newTitle = await showDialog<String>(
+                                  context: context,
+                                  builder:
+                                      (context) => AlertDialog(
+                                        title: const Text("Rename Bite"),
+                                        content: TextField(
+                                          controller: controller,
+                                          decoration: const InputDecoration(
+                                            labelText: "New title",
+                                            border: OutlineInputBorder(),
+                                          ),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed:
+                                                () => Navigator.pop(
+                                                  context,
+                                                  null,
+                                                ),
+                                            child: const Text("Cancel"),
+                                          ),
+                                          TextButton(
+                                            onPressed:
+                                                () => Navigator.pop(
+                                                  context,
+                                                  controller.text.trim(),
+                                                ),
+                                            child: const Text("Rename"),
+                                          ),
+                                        ],
+                                      ),
+                                );
+
+                                if (newTitle != null &&
+                                    newTitle.isNotEmpty &&
+                                    newTitle != title) {
+                                  final bite = await _loader.loadBite(title);
+                                  if (bite != null) {
+                                    bite.title = newTitle;
+                                    await _loader.deleteBite(title);
+                                    await _loader.saveBite(bite);
+                                    await _loader.loadBiteTitles();
+                                    setState(() {
+                                      _BiteTitles = _loader.getBiteTitles();
+                                    }); // Refresh list
+                                  }
+                                }
+                              }
+                            },
+                            itemBuilder:
+                                (context) => [
+                                  const PopupMenuItem(
+                                    value: 'edit',
+                                    child: Text('Edit'),
+                                  ),
+                                  const PopupMenuItem(
+                                    value: 'rename',
+                                    child: Text('Rename'),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'delete',
+                                    child: Text(
+                                      'Delete',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge!
+                                          .copyWith(color: Colors.red),
+                                    ),
+                                  ),
+                                ],
+                          ),
                           onTap: () async {
                             // Navigate to Bite view
+                            await _loader.loadBiteTitles();
+                            setState(() {
+                              _BiteTitles = _loader.getBiteTitles();
+                            }); // Refresh list
                             Bite bite = (await _loader.loadBite(title))!;
                             if (!mounted) return;
                             Navigator.push(
@@ -120,7 +267,11 @@ class _BiteLibraryState extends State<BiteLibrary> {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => BiteBuilder(key: UniqueKey()),
+                            builder:
+                                (context) => BiteBuilder(
+                                  key: UniqueKey(),
+                                  editing: false,
+                                ),
                           ),
                         );
                         await _loader.loadBiteTitles();
