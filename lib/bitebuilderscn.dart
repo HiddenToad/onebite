@@ -135,20 +135,20 @@ class _BiteBuilderState extends State<BiteBuilder> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           Padding(
-          padding: EdgeInsets.only(right: 20),
-          child: IconButton(
-            tooltip: 'Save As',
-            onPressed: () async {
-              final controller = TextEditingController();
-              final title = await showDialog<String>(
-                context: context,
-                builder:
-                    (context) => AlertDialog(
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [const Text("Save Bite As")],
-                      ),
-                      content:  FractionallySizedBox(
+            padding: EdgeInsets.only(right: 20),
+            child: IconButton(
+              tooltip: 'Save As',
+              onPressed: () async {
+                final controller = TextEditingController();
+                final title = await showDialog<String>(
+                  context: context,
+                  builder:
+                      (context) => AlertDialog(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [const Text("Save Bite As")],
+                        ),
+                        content: FractionallySizedBox(
                           widthFactor: 0.75,
                           child: TextField(
                             controller: controller,
@@ -159,28 +159,27 @@ class _BiteBuilderState extends State<BiteBuilder> {
                             maxLines: 1,
                             keyboardType: TextInputType.text,
                             textInputAction: TextInputAction.done,
-                            scrollPhysics: const AlwaysScrollableScrollPhysics(),
+                            scrollPhysics:
+                                const AlwaysScrollableScrollPhysics(),
                           ),
                         ),
-                      actions: [
-                        TextButton(
-                          onPressed:
-                              () => Navigator.pop(
-                                context,
-                                controller.text,
-                              ), 
-                          child: Text('Save'),
-                        ),
-                      ],
-                    ),
-              );
-              if (title != null){
-                var createdBite = Bite(title: title, stepRegions: regions);
-                loader.saveBite(createdBite);
-              }
-            },
-            icon: const Icon(Icons.save_as),
-          ),),
+                        actions: [
+                          TextButton(
+                            onPressed:
+                                () => Navigator.pop(context, controller.text),
+                            child: Text('Save'),
+                          ),
+                        ],
+                      ),
+                );
+                if (title != null) {
+                  var createdBite = Bite(title: title, stepRegions: regions);
+                  loader.saveBite(createdBite);
+                }
+              },
+              icon: const Icon(Icons.save_as),
+            ),
+          ),
         ],
       ),
       body: ListView.builder(
@@ -341,22 +340,40 @@ class _BiteBuilderState extends State<BiteBuilder> {
                               padding: const EdgeInsets.symmetric(
                                 vertical: 6.0,
                               ),
-                              child: TextField(
-                                decoration: InputDecoration(
-                                  hintText: "Step ${i + 1}",
-                                  border: const OutlineInputBorder(),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: TextField(
+                                      decoration: InputDecoration(
+                                        hintText: "Step ${i + 1}",
+                                        border: const OutlineInputBorder(),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 8,
+                                            ),
+                                      ),
+                                      controller: TextEditingController(
+                                          text: text,
+                                        )
+                                        ..selection =
+                                            TextSelection.fromPosition(
+                                              TextPosition(offset: text.length),
+                                            ),
+                                      onChanged: (val) {
+                                        region.setNthStep(i, val);
+                                      },
+                                    ),
                                   ),
-                                ),
-                                controller: TextEditingController(text: text)
-                                  ..selection = TextSelection.fromPosition(
-                                    TextPosition(offset: text.length),
+                                  IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        region.removeStep(i);
+                                      });
+                                    },
+                                    icon: const Icon(Icons.close),
                                   ),
-                                onChanged: (val) {
-                                  region.setNthStep(i, val);
-                                },
+                                ],
                               ),
                             );
                           }),

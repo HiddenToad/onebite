@@ -135,48 +135,46 @@ class _BiteBuilderState extends State<BiteBuilder> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           Padding(
-          padding: EdgeInsets.only(right: 20),
-          child: IconButton(
-            tooltip: 'Save As',
-            onPressed: () async {
-              final controller = TextEditingController();
-              final title = await showDialog<String>(
-                context: context,
-                builder:
-                    (context) => AlertDialog(
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [const Text("Save Bite As")],
-                      ),
-                      actions: [
-                        FractionallySizedBox(
-                          widthFactor: 0.5,
-                          child: TextField(
-                            controller: controller,
-                            decoration: const InputDecoration(
-                              labelText: "Title",
-                              border: OutlineInputBorder(),
+            padding: EdgeInsets.only(right: 20),
+            child: IconButton(
+              tooltip: 'Save As',
+              onPressed: () async {
+                final controller = TextEditingController();
+                final title = await showDialog<String>(
+                  context: context,
+                  builder:
+                      (context) => AlertDialog(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [const Text("Save Bite As")],
+                        ),
+                        actions: [
+                          FractionallySizedBox(
+                            widthFactor: 0.5,
+                            child: TextField(
+                              controller: controller,
+                              decoration: const InputDecoration(
+                                labelText: "Title",
+                                border: OutlineInputBorder(),
+                              ),
                             ),
                           ),
-                        ),
-                        TextButton(
-                          onPressed:
-                              () => Navigator.pop(
-                                context,
-                                controller.text,
-                              ), 
-                          child: Text('Save'),
-                        ),
-                      ],
-                    ),
-              );
-              if (title != null){
-                var createdBite = Bite(title: title, stepRegions: regions);
-                loader.saveBite(createdBite);
-              }
-            },
-            icon: const Icon(Icons.save_as),
-          ),),
+                          TextButton(
+                            onPressed:
+                                () => Navigator.pop(context, controller.text),
+                            child: Text('Save'),
+                          ),
+                        ],
+                      ),
+                );
+                if (title != null) {
+                  var createdBite = Bite(title: title, stepRegions: regions);
+                  loader.saveBite(createdBite);
+                }
+              },
+              icon: const Icon(Icons.save_as),
+            ),
+          ),
         ],
       ),
       body: ListView.builder(

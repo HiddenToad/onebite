@@ -19,8 +19,7 @@ class BiteLoader {
     }
 
     var jsonFiles =
-        BiteDirectory
-            .listSync()
+        BiteDirectory.listSync()
             .where((entity) => entity.path.endsWith('.json'))
             .toList();
 

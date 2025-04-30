@@ -9,14 +9,11 @@ class BitePlayer extends StatefulWidget {
   final String title = "onebite";
 
   @override
-  State<BitePlayer> createState() =>
-      _BitePlayerState(bite: bite);
+  State<BitePlayer> createState() => _BitePlayerState(bite: bite);
 }
 
 class _BitePlayerState extends State<BitePlayer> {
-  _BitePlayerState({required bite})
-    : _current_bite = bite,
-      _finished = false;
+  _BitePlayerState({required bite}) : _current_bite = bite, _finished = false;
 
   var _finished = false;
 
